@@ -1,0 +1,27 @@
+version: '3'
+
+
+services:
+  web:
+    container_name: web
+    image: web
+    build: .
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+        consistency: cached
+      - type: bind
+        source: ./deployment/conf/supervisord.conf
+        target: /etc/supervisor/conf.d/supervisord.conf
+        consistency: cached
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health-check/?format=json"]
+      interval: 30s
+      timeout: 60s
+      retries: 3
+    command: python manage.py runserver 0.0.0.0:8000
